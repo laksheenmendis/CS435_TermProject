@@ -4,7 +4,7 @@
 		module="sanfranciscoincidents$sources_2.11"
 		revision="0.1"
 		status="integration"
-		publication="20191120151232"
+		publication="20191125111303"
 	/>
 	<configurations>
 		<conf name="compile" visibility="public" description=""/>

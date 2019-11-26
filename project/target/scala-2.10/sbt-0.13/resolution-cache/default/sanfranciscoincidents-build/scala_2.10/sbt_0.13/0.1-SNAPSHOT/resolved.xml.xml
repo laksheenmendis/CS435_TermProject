@@ -4,7 +4,7 @@
 		module="sanfranciscoincidents-build"
 		revision="0.1-SNAPSHOT"
 		status="integration"
-		publication="20191120150806"
+		publication="20191125111252"
 		e:sbtVersion="0.13" e:scalaVersion="2.10"
 	>
 		<description>

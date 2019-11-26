@@ -7,7 +7,7 @@
 		revision="0.1"
 		conf="compile"
 		confs="compile, runtime, test, provided, optional, compile-internal, runtime-internal, test-internal, plugin, sources, docs, pom, scala-tool"
-		date="20191120151232"/>
+		date="20191125111303"/>
 	<dependencies>
 		<module organisation="org.apache.spark" name="spark-graphx_2.11">
 			<revision name="2.4.4" status="release" pubdate="20190827165910" resolver="sbt-chain" artresolver="sbt-chain" homepage="http://spark.apache.org/" downloaded="false" searched="false" default="false" conf="default, compile, runtime, default(compile), master" position="86">
