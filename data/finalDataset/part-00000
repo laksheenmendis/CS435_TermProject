@@ -1,0 +1,4 @@
+(94102,(censusData: {0116038;22351;308699300},incidentData(hour 0 - 6): {4096}----incidentData(hour 6 - 12): {8208}----incidentData(hour 12 - 18): {11693}----incidentData(hour 18 - 24): {9252}))
+(94117,(censusData: {0116064;63983;862698400},incidentData(hour 0 - 6): {966}----incidentData(hour 6 - 12): {2254}----incidentData(hour 12 - 18): {3053}----incidentData(hour 18 - 24): {2079}))
+(94131,(censusData: {0116083;76044;778117200},incidentData(hour 0 - 6): {466}----incidentData(hour 6 - 12): {669}----incidentData(hour 12 - 18): {1093}----incidentData(hour 18 - 24): {1113}))
+(94124,(censusData: {0116074;37146;194031000},incidentData(hour 0 - 6): {1954}----incidentData(hour 6 - 12): {3040}----incidentData(hour 12 - 18): {4496}----incidentData(hour 18 - 24): {3810}))
