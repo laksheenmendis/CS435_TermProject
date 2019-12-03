@@ -4,7 +4,7 @@
 		module="sanfranciscoincidents_2.11"
 		revision="0.1"
 		status="integration"
-		publication="20191202132357"
+		publication="20191203150231"
 	>
 		<description>
 		SanFranciscoIncidents
@@ -37,6 +37,6 @@
 		<dependency org="org.apache.spark" name="spark-core_2.11" rev="2.4.4" conf="compile->default(compile)"/>
 		<dependency org="org.apache.spark" name="spark-sql_2.11" rev="2.4.4" conf="compile->default(compile)"/>
 		<dependency org="org.apache.spark" name="spark-graphx_2.11" rev="2.4.4" conf="compile->default(compile)"/>
-		<dependency org="org.apache.spark" name="spark-mllib_2.11" rev="2.4.4" conf="runtime->default(compile)"/>
+		<dependency org="org.apache.spark" name="spark-mllib_2.11" rev="2.4.4" conf="compile->default(compile)"/>
 	</dependencies>
 </ivy-module>
