@@ -13,9 +13,6 @@ object IncidentClassification {
     val sqlContext = SparkSession.builder().master("local").getOrCreate().sqlContext
 
     //read in incident files which have zip codes
-    var incidentFile1 = sc.textFile(INCIDENT_FILE_1)
-    val incidentFile2 = sc.textFile(INCIDENT_FILE_2)
-
     var incidentDF1 = sqlContext.read.format("csv").option("header","false").load(INCIDENT_FILE_1)
     val header1 = incidentDF1.first()
     incidentDF1 = incidentDF1.filter(row => row != header1)
@@ -24,15 +21,24 @@ object IncidentClassification {
 
     val incidents = incidentDF1.union(incidentDF2)
 
+    //select the required columns for the dataframe
     val columnNames = Seq("_c0", "_c2", "_c3", "_c4", "_c5", "_c14", "_c15")
     var filteredDF = incidents.select(columnNames.head, columnNames.tail: _*)
 
-    //TODO remove
-    filteredDF.show()
+    // rename columns
+    filteredDF = filteredDF.withColumnRenamed("_c0","zipcode_with_bracket")
+      .withColumnRenamed("_c2","full_date")
+      .withColumnRenamed("_c3","full_time")
+      .withColumnRenamed("_c4","year")
+      .withColumnRenamed("_c5","day_of_week")
+      .withColumnRenamed("_c14","incident_code")
+      .withColumnRenamed("_c15","incident_category")
+
+//    filteredDF.show()
 
     val remove_bracket = udf((zipcodeVal:String) => zipcodeVal.substring(1, zipcodeVal.length))
 
-    filteredDF = filteredDF.withColumn("zipcode", remove_bracket(filteredDF.col("_c0")))
+    filteredDF = filteredDF.withColumn("zipcode", remove_bracket(filteredDF.col("zipcode_with_bracket")))
 
     val weight_incident = udf((incidentType:String) => {
       if(incidentType=="Non-Criminal" || incidentType=="Other" || incidentType=="Other Miscellaneous" || incidentType=="Case Closure")
@@ -66,25 +72,40 @@ object IncidentClassification {
     )
 
     //add the weights column to the dataframe
-    var weighted_DF = filteredDF.withColumn("weight", weight_incident(filteredDF.col("_c15")))
+    var weighted_DF = filteredDF.withColumn("weight", weight_incident(filteredDF.col("incident_category")))
 
-    weighted_DF.foreach(y => println(y))
+    //select needed columns
+    weighted_DF = weighted_DF.select("zipcode",  "full_date", "full_time", "year","day_of_week", "incident_code", "weight")
 
     //remove records which have atleast one null value
-    weighted_DF = weighted_DF.filter(
-        weighted_DF.col("_c5").isNotNull
-        .or(weighted_DF.col("zipcode").notEqual("00000"))
-        .or(weighted_DF.col("_c2").notEqual("null"))
-        .or(weighted_DF.col("_c3").notEqual("null"))
-        .or(weighted_DF.col("_c4").notEqual("null"))
-        .or(weighted_DF.col("_c14").notEqual("null"))
-        .or(weighted_DF.col("_c15").notEqual("null"))
-    )
+    var dfWithoutNulls = weighted_DF.filter(col("zipcode").notEqual("00000"))
+    dfWithoutNulls = dfWithoutNulls.filter(col("day_of_week").notEqual("null"))
+    dfWithoutNulls = dfWithoutNulls.filter(col("full_date").notEqual("null"))
+    dfWithoutNulls = dfWithoutNulls.filter(col("full_time").notEqual("null"))
+    dfWithoutNulls = dfWithoutNulls.filter(col("year").notEqual("null"))
+    dfWithoutNulls = dfWithoutNulls.filter(col("incident_code").notEqual("null"))
+    dfWithoutNulls = dfWithoutNulls.filter(col("weight").notEqual(0))
 
-    weighted_DF = weighted_DF.select("zipcode",  "_c2", "_c3", "_c4","_c5", "_c14", "weight")
-    weighted_DF.foreach(x => println(x))
+    // create new column for month
+    val get_month = udf((date:String) => date.substring(5, 7))
+    dfWithoutNulls = dfWithoutNulls.withColumn("month", get_month(dfWithoutNulls.col("full_date")))
 
+    // create new column for date
+    val get_date = udf((date:String) => date.substring(8, 10))
+    dfWithoutNulls = dfWithoutNulls.withColumn("date", get_date(dfWithoutNulls.col("full_date")))
 
+    // create new column for hour
+    val get_hour = udf((time:String) => time.substring(0,2))
+    dfWithoutNulls = dfWithoutNulls.withColumn("hour", get_hour(dfWithoutNulls.col("full_time")))
+
+    // create new column for minute
+    val get_minute = udf((time:String) => time.substring(3,5))
+    dfWithoutNulls = dfWithoutNulls.withColumn("minute", get_minute(dfWithoutNulls.col("full_time")))
+
+    //select needed columns
+    dfWithoutNulls = dfWithoutNulls.select("zipcode",  "month", "date",  "hour", "minute", "year","day_of_week", "incident_code", "weight")
+
+    dfWithoutNulls.foreach(x => println(x))
   }
 
 }
