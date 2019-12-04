@@ -1,5 +1,9 @@
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.feature.{OneHotEncoderEstimator, StringIndexer}
+import org.apache.spark.ml.classification.RandomForestClassifier
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+import org.apache.spark.ml.feature.{OneHotEncoderEstimator, StringIndexer, VectorAssembler}
+import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
+import org.apache.spark.mllib.evaluation.{BinaryClassificationMetrics, MulticlassMetrics}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 
@@ -8,11 +12,14 @@ object IncidentClassification {
 
     val INCIDENT_FILE_1 = args(0)
     val INCIDENT_FILE_2 = args(1)
+    val NO_OF_CROSS_VALIDATION_FOLDS = args(2)
+    val OUTPUT_FILE = args(3)
 
-    //TODO change master to yarn
-    val spark: SparkSession = SparkSession.builder.master("local").getOrCreate
+    val sb = new StringBuilder("")
+
+    val spark: SparkSession = SparkSession.builder.master("yarn").getOrCreate
     val sc = spark.sparkContext
-    val sqlContext = SparkSession.builder().master("local").getOrCreate().sqlContext
+    val sqlContext = SparkSession.builder().master("yarn").getOrCreate().sqlContext
 
     //read in incident files which have zip codes
     var incidentDF1 = sqlContext.read.format("csv").option("header","false").load(INCIDENT_FILE_1)
@@ -22,6 +29,9 @@ object IncidentClassification {
     val incidentDF2 = sqlContext.read.format("csv").option("header","false").load(INCIDENT_FILE_2)
 
     val incidents = incidentDF1.union(incidentDF2)
+
+    val total_count = incidents.count()
+    sb.append("Total Records : " + total_count + "\n\n")
 
     //select the required columns for the dataframe
     val columnNames = Seq("_c0", "_c2", "_c3", "_c4", "_c5", "_c14", "_c15")
@@ -73,62 +83,152 @@ object IncidentClassification {
     }
     )
 
-    //add the weights column to the dataframe
-    var weighted_DF = filteredDF.withColumn("weight", weight_incident(filteredDF.col("incident_category")))
-
-    //select needed columns
-    weighted_DF = weighted_DF.select("zipcode",  "full_date", "full_time", "year","day_of_week", "incident_code", "weight")
+    //add the label column to the dataframe (it will be weights) and select columns
+    var weighted_DF = filteredDF.withColumn("label", weight_incident(filteredDF.col("incident_category")))
+        .select("zipcode",  "full_date", "full_time", "year","day_of_week", "incident_code", "label")
 
     //remove records which have atleast one null value
     var dfWithoutNulls = weighted_DF.filter(col("zipcode").notEqual(0))
-    dfWithoutNulls = dfWithoutNulls.filter(col("day_of_week").notEqual("null"))
-    dfWithoutNulls = dfWithoutNulls.filter(col("full_date").notEqual("null"))
-    dfWithoutNulls = dfWithoutNulls.filter(col("full_time").notEqual("null"))
-    dfWithoutNulls = dfWithoutNulls.filter(col("year").notEqual("null"))
-    dfWithoutNulls = dfWithoutNulls.filter(col("incident_code").notEqual("null"))
-    dfWithoutNulls = dfWithoutNulls.filter(col("weight").notEqual(0))
+      .filter(col("day_of_week").notEqual("null"))
+      .filter(col("full_date").notEqual("null"))
+      .filter(col("full_time").notEqual("null"))
+      .filter(col("year").notEqual("null"))
+      .filter(col("incident_code").notEqual("null"))
+      .filter(col("label").notEqual(0))
 
-    // create new column for month
+    val total_after_removing_null = dfWithoutNulls.count()
+    sb.append("Total Records after removing null values :"+total_after_removing_null + "\n\n")
+    sb.append("Ratio %.2f".format(total_after_removing_null.toDouble/total_count.toDouble * 100) + "%\n\n")
+
+    // udf for creating month column
     val get_month = udf((date:String) => date.substring(5, 7).toInt)
-    dfWithoutNulls = dfWithoutNulls.withColumn("month", get_month(dfWithoutNulls.col("full_date")))
-
-    // create new column for date
+    // udf for creating date column
     val get_date = udf((date:String) => date.substring(8, 10).toInt)
-    dfWithoutNulls = dfWithoutNulls.withColumn("date", get_date(dfWithoutNulls.col("full_date")))
-
-    // create new column for hour
+    // udf for creating hour column
     val get_hour = udf((time:String) => time.substring(0,2).toInt)
-    dfWithoutNulls = dfWithoutNulls.withColumn("hour", get_hour(dfWithoutNulls.col("full_time")))
-
-    // create new column for minute
+    // udf for creating minute column
     val get_minute = udf((time:String) => time.substring(3,5).toInt)
-    dfWithoutNulls = dfWithoutNulls.withColumn("minute", get_minute(dfWithoutNulls.col("full_time")))
-
-    // convert year and incident_code columns to int
+    // udf to convert year and incident_code columns to int
     val toInt    = udf[Int, String]( _.toInt)
-    dfWithoutNulls = dfWithoutNulls.withColumn("intYear", toInt(dfWithoutNulls("year")))
-      .drop("year").withColumnRenamed("intYear", "year")
 
-    dfWithoutNulls = dfWithoutNulls.withColumn("int_incident_code", toInt(dfWithoutNulls("incident_code")))
+    dfWithoutNulls = dfWithoutNulls.withColumn("month", get_month(dfWithoutNulls.col("full_date")))
+      .withColumn("date", get_date(dfWithoutNulls.col("full_date")))
+      .withColumn("hour", get_hour(dfWithoutNulls.col("full_time")))
+      .withColumn("minute", get_minute(dfWithoutNulls.col("full_time")))
+      .withColumn("intYear", toInt(dfWithoutNulls("year")))
+      .drop("year").withColumnRenamed("intYear", "year")
+      .withColumn("int_incident_code", toInt(dfWithoutNulls("incident_code")))
       .drop("incident_code").withColumnRenamed("int_incident_code", "incident_code")
 
     //select needed columns
-    dfWithoutNulls = dfWithoutNulls.select("zipcode",  "month", "date",  "hour", "minute", "year","day_of_week", "incident_code", "weight")
+    dfWithoutNulls = dfWithoutNulls.select("zipcode",  "month", "date",  "hour", "minute", "year","day_of_week", "incident_code", "label")
 
-    dfWithoutNulls.foreach(x => println(x))
+//    dfWithoutNulls.foreach(x => println(x))
 
     // perform one hot encoding on zipcode, month, date, hour, minute, year, day_of_week and incident_code
-    val indexer = new StringIndexer().setInputCol("day_of_week").setOutputCol("day_of_week_index")
+    val indexer = new StringIndexer()
+      .setInputCol("day_of_week")
+      .setOutputCol("day_of_week_index")
+
     val encoder = new OneHotEncoderEstimator()
       .setInputCols(Array(indexer.getOutputCol, "zipcode",  "month", "date",  "hour", "minute", "year", "incident_code"))
-      .setOutputCols(Array("dayOfWeekVec", "zipCodeVec", "monthVec", "dateVec",  "hourVec", "minuteVec", "yearVec", "incidentCode_Vec"))
+      .setOutputCols(Array("dayOfWeekVec", "zipCodeVec", "monthVec", "dateVec",  "hourVec", "minuteVec", "yearVec", "incidentCodeVec"))
 
-    val pipeline = new Pipeline().setStages(Array(indexer, encoder))
+    // Set the input columns as the features we want to use
+    val assembler = (new VectorAssembler()
+      .setInputCols(encoder.getOutputCols)
+      .setOutputCol("features"))
 
-    val oneHotEncodedDF = pipeline.fit(dfWithoutNulls).transform(dfWithoutNulls).select("zipCodeVec", "monthVec", "dateVec",  "hourVec", "minuteVec", "yearVec", "incidentCode_Vec", "dayOfWeekVec", "weight")
+    // create a pipeline
+    val pipelineDF = new Pipeline().setStages(Array(indexer, encoder, assembler))
 
-    oneHotEncodedDF.show()
+    import sqlContext.implicits._
+    val oneHotEncodedDF = pipelineDF.fit(dfWithoutNulls).transform(dfWithoutNulls).select($"label",$"features")
 
+    // Splitting the data by create an array of the training and test data
+    val Array(training, test) = oneHotEncodedDF.randomSplit(Array(0.7, 0.3), seed = 12345)
+
+    // create the model
+    val rf = new RandomForestClassifier()
+
+    // create the param grid
+    val paramGrid = new ParamGridBuilder().
+      addGrid(rf.numTrees, Array(5, 10, 20, 30, 40, 50)).
+      addGrid(rf.impurity, Array("entropy", "gini")).
+      addGrid(rf.maxDepth, Array(2, 3, 5, 8)).
+      addGrid(rf.minInstancesPerNode, Array(5, 10, 15, 20)).
+      addGrid(rf.maxBins, Array(5, 10, 20, 30)).
+      build()
+
+    // create cross val object, define scoring metric
+    val cv = new CrossValidator().
+      setEstimator(rf).
+      setEvaluator(new MulticlassClassificationEvaluator().setMetricName("weightedRecall")).
+      setEstimatorParamMaps(paramGrid).
+      setNumFolds(NO_OF_CROSS_VALIDATION_FOLDS.toInt).
+      setParallelism(2)
+
+    // You can then treat this object as the model and use fit on it.
+    val model = cv.fit(training)
+
+    sb.append("Estimator : " + model.bestModel.extractParamMap() +"\n\n")
+
+    val results = model.transform(test).select("features", "label", "prediction")
+
+    val predictionAndLabels = results.
+      select($"prediction",$"label").
+      as[(Double, Double)].
+      rdd
+
+    // Instantiate a new metrics objects
+    val bMetrics = new BinaryClassificationMetrics(predictionAndLabels)
+    val mMetrics = new MulticlassMetrics(predictionAndLabels)
+    val labels = mMetrics.labels
+
+//    println("Labels are: " + labels)
+//    sb.append("Labels are: " + labels + "\n\n")
+
+    // Get the Confusion matrix
+    sb.append("Confusion matrix: \n" + mMetrics.confusionMatrix + "\n\n")
+
+    // Precision by label
+    sb.append("Precision\n")
+    labels.foreach { l =>
+//      println(s"Precision($l) = " + mMetrics.precision(l))
+      sb.append(s"Precision($l) = " + mMetrics.precision(l)+ "\n")
+    }
+    sb.append("\n")
+
+    // Recall by label
+    sb.append("Recall\n")
+    labels.foreach { l =>
+//      println(s"Recall($l) = " + mMetrics.recall(l))
+      sb.append(s"Recall($l) = " + mMetrics.recall(l) + "\n")
+    }
+    sb.append("\n")
+
+    // False positive rate by label
+    sb.append("False positive rate\n")
+    labels.foreach { l =>
+//      println(s"FPR($l) = " + mMetrics.falsePositiveRate(l))
+      sb.append(s"FPR($l) = " + mMetrics.falsePositiveRate(l) + "\n")
+    }
+    sb.append("\n")
+
+    // F-measure by label
+    sb.append("F1-Score\n")
+    labels.foreach { l =>
+//      println(s"F1-Score($l) = " + mMetrics.fMeasure(l))
+      sb.append(s"F1-Score($l) = " + mMetrics.fMeasure(l) + "\n")
+    }
+    sb.append("\n")
+
+    // PrintWriter
+    import java.io._
+    val pw = new PrintWriter(new File(OUTPUT_FILE ))
+
+    pw.write(sb.toString())
+    pw.close
 
   }
 
