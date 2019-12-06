@@ -46,8 +46,8 @@ object RandomForest {
 
       val weight = weighIncident(data(15))
 
-      if( toInt(data(0)) != 0 && !data(2).equals("null") && !data(3).equals("null") && !data(4).equals("null") && !data(5).equals("null") && !data(14).equals("null") && !data(15).equals("null")
-      && data(2) != null && data(3) != null && data(4) != null && data(5) != null && data(14) != null && data(15) != null && weight != 0)
+      if( toInt(data(0)) != 0 && !data(2).equals("null") && !data(3).equals("null") && !data(4).equals("null") && !data(5).equals("null") && !data(15).equals("null")
+      && data(2) != null && data(3) != null && data(4) != null && data(5) != null && data(15) != null && weight != 0)
       {
         val zipCode = data(0)
         val month = get_month(data(2))
@@ -56,9 +56,8 @@ object RandomForest {
         val minute = get_minute(data(3))
         val year = data(4)
         val dayOfWeek = data(5)
-        val incidentCode = data(14)
 
-        zipCode+","+month+","+date+","+hour+","+minute+","+year+","+dayOfWeek+","+incidentCode+","+weight
+        zipCode+","+month+","+date+","+hour+","+minute+","+year+","+dayOfWeek+","+weight
       }
       else
       {
@@ -81,18 +80,20 @@ object RandomForest {
 
     dataFrame.show()
 
-    // perform one hot encoding on zipcode, month, date, hour, minute, year, day_of_week and incident_code
+    // perform one hot encoding on zipcode, month, date, hour, minute, year, day_of_week
     val indexer = new StringIndexer()
       .setInputCol("dayOfWeek")
       .setOutputCol("dayOfWeekIndex")
 
     val encoder = new OneHotEncoderEstimator()
-      .setInputCols(Array(indexer.getOutputCol, "zipcode",  "month", "date",  "hour", "minute", "year", "incidentCode"))
-      .setOutputCols(Array("dayOfWeekVec", "zipCodeVec", "monthVec", "dateVec",  "hourVec", "minuteVec", "yearVec", "incidentCodeVec"))
+      .setInputCols(Array(indexer.getOutputCol))
+      .setOutputCols(Array("dayOfWeekVec"))
+
+    val featureNameArray = encoder.getOutputCols :+ "zipcode" :+ "month" :+ "date" :+ "hour" :+ "minute" :+ "year"
 
     // Set the input columns as the features we want to use
     val assembler = (new VectorAssembler()
-      .setInputCols(encoder.getOutputCols)
+      .setInputCols(featureNameArray)
       .setOutputCol("features"))
 
     // create a pipeline
@@ -101,6 +102,7 @@ object RandomForest {
     import sqlContext.implicits._
     val oneHotEncodedDF = pipelineDF.fit(dataFrame).transform(dataFrame).select($"label",$"features")
 
+    println("One Hot Encoding Finished")
     // Splitting the data by create an array of the training and test data
     val Array(training, test) = oneHotEncodedDF.randomSplit(Array(0.7, 0.3), seed = 12345)
 
@@ -128,13 +130,19 @@ object RandomForest {
     val cv = new CrossValidator().
       setEstimator(rf).
       setEvaluator(new MulticlassClassificationEvaluator().setMetricName("weightedRecall")).
-      setEstimatorParamMaps(paramGrid)
-//      setNumFolds(NO_OF_CROSS_VALIDATION_FOLDS.toInt).
-//      setParallelism(2)
+      setEstimatorParamMaps(paramGrid).
+      setNumFolds(3).
+      setParallelism(2)
+
+    val startTime = System.currentTimeMillis()
 
     // You can then treat this object as the model and use fit on it.
     val model = cv.fit(training)
 
+    val endTime = System.currentTimeMillis()
+    val trainingTime = (endTime - startTime)/(1000*60)
+
+    sb.append("Model Training Time : " + trainingTime +"\n\n")
     model.save(MODEL_OUTPUT_PATH)
 
     sb.append("Estimator : " + model.bestModel.extractParamMap() +"\n\n")
@@ -212,12 +220,11 @@ object RandomForest {
         StructField(name = "minute", dataType = IntegerType, nullable = false),
         StructField(name = "year", dataType = IntegerType, nullable = false),
         StructField(name = "dayOfWeek", dataType = StringType, nullable = false),
-        StructField(name = "incidentCode", dataType = IntegerType, nullable = false),
         StructField(name = "label", dataType = IntegerType, nullable = false)
       )
     )
 
-  def row(line: List[String]): Row = Row(line(0).toInt, line(1).toInt, line(2).toInt, line(3).toInt, line(4).toInt, line(5).toInt, line(6), line(7).toInt, line(8).toInt)
+  def row(line: List[String]): Row = Row(line(0).toInt, line(1).toInt, line(2).toInt, line(3).toInt, line(4).toInt, line(5).toInt, line(6), line(7).toInt)
 
 
   def weighIncident(incidentType:String) : Int = {

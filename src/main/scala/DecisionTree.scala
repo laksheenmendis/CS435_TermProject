@@ -38,8 +38,8 @@ object DecisionTree {
       val result = value.substring(1,value.length-1)
       val data = result.split(",")
 
-      if( toInt(data(0)) != 0 && !data(2).equals("null") && !data(3).equals("null") && !data(4).equals("null") && !data(5).equals("null") && !data(14).equals("null") && !data(15).equals("null")
-        && data(2) != null && data(3) != null && data(4) != null && data(5) != null && data(14) != null && data(15) != null)
+      if( toInt(data(0)) != 0 && !data(2).equals("null") && !data(3).equals("null") && !data(4).equals("null") && !data(5).equals("null") && !data(15).equals("null")
+        && data(2) != null && data(3) != null && data(4) != null && data(5) != null && data(15) != null)
       {
         val zipCode = data(0)
         val month = get_month(data(2))
@@ -48,10 +48,9 @@ object DecisionTree {
         val minute = get_minute(data(3))
         val year = data(4)
         val dayOfWeek = data(5)
-        val incidentCode = data(14)
         val weight = weighIncident(data(15))
 
-        zipCode+","+month+","+date+","+hour+","+minute+","+year+","+dayOfWeek+","+incidentCode+","+weight
+        zipCode+","+month+","+date+","+hour+","+minute+","+year+","+dayOfWeek+","+weight
       }
       else
       {
