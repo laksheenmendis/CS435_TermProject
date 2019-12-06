@@ -48,14 +48,14 @@ object DataParse {
 
 
   def main(args: Array[String]) : Unit = {
-//    val conf = new SparkConf().setAppName("censusAnalysis").setMaster("local")
+    //    val conf = new SparkConf().setAppName("censusAnalysis").setMaster("local")
     val conf = new SparkConf().setAppName("censusAnalysis").setMaster("yarn")
     val sc = new SparkContext(conf)
 
     //Getting all of the incident data that is needed for analysis
-//    val incidentFile1 = sc.textFile("data/testingData/incidents1")
+    //    val incidentFile1 = sc.textFile("data/testingData/incidents1")
     val incidentFile1 = sc.textFile(args(0))
-//    val incidentFile2 = sc.textFile("data/testingData/incidents2.txt")
+    //    val incidentFile2 = sc.textFile("data/testingData/incidents2.txt")
     val incidentFile2 = sc.textFile(args(1))
 
     val incidentData1 = incidentFile1.map(value => {
@@ -77,9 +77,9 @@ object DataParse {
     val incidents = incidentData1.union(incidentData2)
 
     //Getting all of the census data that is needed for analysis
-//    val censusFile1 = sc.textFile("data/censusData1")
+    //    val censusFile1 = sc.textFile("data/censusData1")
     val censusFile1 = sc.textFile(args(2))
-//    val censusFile2 = sc.textFile("data/censusData2")
+    //    val censusFile2 = sc.textFile("data/censusData2")
     val censusFile2 = sc.textFile(args(3))
 
     val censusData1 = censusFile1.map(value => {
@@ -87,7 +87,7 @@ object DataParse {
       val data = result.split(",")
 
       //zip code -- Total Population, aggregate household income, population with a poverty status
-      (value.substring(1,6), "Total Population: "+data(0)+"; Aggregate Household Income: "+data(1237)+"; Population with a Poverty Status "+data(1504))
+      (value.substring(1,6), "Total Population: "+data(1)+"; Median Household Income: "+data(1237)+"; Per Capita Income: "+data(1455)+"; Population with a Poverty Status "+data(1507))
     })
 
     val censusData2 = censusFile2.map(value => {
@@ -95,7 +95,7 @@ object DataParse {
       val data = result.split(",")
 
       //zip code -- Total Population, aggregate household income, population with a poverty status
-      (value.substring(1,6), "Total Population: "+data(0)+"; Aggregate Household Income: "+data(1237)+"; Population with a Poverty Status "+data(1504))
+      (value.substring(1,6), "Total Population: "+data(1)+"; Median Household Income: "+data(1237)+"; Per Capita Income: "+data(1455)+"; Population with a Poverty Status "+data(1507))
     })
 
     //Remove duplicate values
@@ -122,6 +122,11 @@ object DataParse {
       var num3 = 0
       var num4 = 0
 
+      var theftCount1 = 0
+      var theftCount2 = 0
+      var theftCount3 = 0
+      var theftCount4 = 0
+
       var time1Avg = 0;
       var time2Avg = 0;
       var time3Avg = 0;
@@ -139,18 +144,34 @@ object DataParse {
         if(0 <= firstHalf && firstHalf < 6){
           num1 = num1 + 1
           time1Avg = time1Avg + weight
+          if(incidentType=="Motor Vehicle Theft" || incidentType=="Stolen Property" || incidentType=="Robbery" || incidentType=="Motor Vehicle Theft?" ||
+            incidentType=="Larceny Theft" || incidentType=="Burglary") {
+            theftCount1 = theftCount1 + 1
+          }
         }
         else if(6 <= firstHalf && firstHalf < 12){
           num2 = num2 + 1
           time2Avg = time2Avg + weight
+          if(incidentType=="Motor Vehicle Theft" || incidentType=="Stolen Property" || incidentType=="Robbery" || incidentType=="Motor Vehicle Theft?" ||
+            incidentType=="Larceny Theft" || incidentType=="Burglary") {
+            theftCount2 = theftCount2 + 1
+          }
         }
         else if(12 <= firstHalf && firstHalf < 18){
           num3 = num3 + 1
           time3Avg = time3Avg + weight
+          if(incidentType=="Motor Vehicle Theft" || incidentType=="Stolen Property" || incidentType=="Robbery" || incidentType=="Motor Vehicle Theft?" ||
+            incidentType=="Larceny Theft" || incidentType=="Burglary") {
+            theftCount3 = theftCount3 + 1
+          }
         }
         else if(18 <= firstHalf && firstHalf < 24){
           num4 = num4 + 1
           time4Avg = time4Avg + weight
+          if(incidentType=="Motor Vehicle Theft" || incidentType=="Stolen Property" || incidentType=="Robbery" || incidentType=="Motor Vehicle Theft?" ||
+            incidentType=="Larceny Theft" || incidentType=="Burglary") {
+            theftCount4 = theftCount4 + 1
+          }
         }
         index = index + 1
       }
@@ -160,21 +181,21 @@ object DataParse {
       val average3 = time3Avg.toFloat / num3;
       val average4 = time4Avg.toFloat / num4;
 
+      val total = num1 + num2 + num3 + num4
 
-      val time1 = "incidentData(hour 0 - 6): {" + num1 + "}" + "; averageIncidentWeight(hour 0 - 6): {" + average1 + "}"
+      val time1 = "incidentCount(hour 0 - 6): {" + num1 + "}" + "; averageIncidentWeight(hour 0 - 6): {" + average1 + "}" + "; theftCounts(0 - 6): {" + theftCount1 + "}"
 
-      val time2 = "incidentData(hour 6 - 12): {" + num2 + "}" + "; averageIncidentWeight(hour 6 - 12): {" + average2 + "}"
+      val time2 = "incidentCount(hour 6 - 12): {" + num2 + "}" + "; averageIncidentWeight(hour 6 - 12): {" + average2 + "}" + "; theftCounts(6 - 12): {" + theftCount2 + "}"
 
-      val time3 = "incidentData(hour 12 - 18): {" + num3 + "}" + "; averageIncidentWeight(hour 12 - 18): {" + average3 + "}"
+      val time3 = "incidentCount(hour 12 - 18): {" + num3 + "}" + "; averageIncidentWeight(hour 12 - 18): {" + average3 + "}" + "; theftCounts(12 - 18): {" + theftCount3 + "}"
 
-      val time4 = "incidentData(hour 18 - 24): {" + num4 + "}" + "; averageIncidentWeight(hour 18 - 24): {" + average4 + "}"
-      val result = time1 + "----" + time2 + "----" + time3 + "----" + time4
+      val time4 = "incidentCount(hour 18 - 24): {" + num4 + "}" + "; averageIncidentWeight(hour 18 - 24): {" + average4 + "}" + "; theftCounts(18 - 24): {" + theftCount4 + "}"
+      val result = "totalIncidentCount: " + total + "----" + time1 + "----" + time2 + "----" + time3 + "----" + time4
 
       (value._1, (censusPortion, result))
     })
 
-//    finalData.saveAsTextFile("output")
+    //    finalData.saveAsTextFile("output")
     finalData.saveAsTextFile(args(4))
   }
 }
-
