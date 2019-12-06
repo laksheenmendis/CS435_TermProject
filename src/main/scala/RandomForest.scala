@@ -12,9 +12,13 @@ object RandomForest {
 
     val INCIDENT_FILE_1 = args(0)
     val INCIDENT_FILE_2 = args(1)
-    val NO_OF_CROSS_VALIDATION_FOLDS = args(2)
-    val OUTPUT_FILE = args(3)
-    val MODEL_OUTPUT_PATH = args(4)
+    val OUTPUT_FILE = args(2)
+    val MODEL_OUTPUT_PATH = args(3)
+    val NO_OF_TREES = args(4)
+    val IMPURITY = args(5)
+    val MAX_DEPTH = args(6)
+    val MIN_INSTANCES_PER_NODE = args(7)
+    val MAX_BINS = args(8)
 
     val spark: SparkSession = SparkSession.builder.master("yarn").getOrCreate
     val sc = spark.sparkContext
@@ -24,8 +28,8 @@ object RandomForest {
     val sb = new StringBuilder("RandomForestClassifier\n")
 
     //Getting all of the incident data that is needed for analysis
-    var incidentFile1 = sc.textFile(INCIDENT_FILE_1)
-    val incidentFile2 = sc.textFile(INCIDENT_FILE_2)
+    var incidentFile1 = sc.textFile(INCIDENT_FILE_1,10)
+    val incidentFile2 = sc.textFile(INCIDENT_FILE_2,10)
 
     val header1 = incidentFile1.first()
     incidentFile1 = incidentFile1.filter(row => row != header1)
@@ -112,20 +116,20 @@ object RandomForest {
 //      build()
 
     val paramGrid = new ParamGridBuilder().
-      addGrid(rf.numTrees, Array(5, 10)).
-      addGrid(rf.impurity, Array("entropy", "gini")).
-      addGrid(rf.maxDepth, Array(2)).
-      addGrid(rf.minInstancesPerNode, Array(5,10)).
-      addGrid(rf.maxBins, Array(3)).
+      addGrid(rf.numTrees, Array(NO_OF_TREES.toInt)).
+      addGrid(rf.impurity, Array(IMPURITY)).
+      addGrid(rf.maxDepth, Array(MAX_DEPTH.toInt)).
+      addGrid(rf.minInstancesPerNode, Array(MIN_INSTANCES_PER_NODE.toInt)).
+      addGrid(rf.maxBins, Array(MAX_BINS.toInt)).
       build()
 
     // create cross val object, define scoring metric
     val cv = new CrossValidator().
       setEstimator(rf).
       setEvaluator(new MulticlassClassificationEvaluator().setMetricName("weightedRecall")).
-      setEstimatorParamMaps(paramGrid).
-      setNumFolds(NO_OF_CROSS_VALIDATION_FOLDS.toInt).
-      setParallelism(2)
+      setEstimatorParamMaps(paramGrid)
+//      setNumFolds(NO_OF_CROSS_VALIDATION_FOLDS.toInt).
+//      setParallelism(2)
 
     // You can then treat this object as the model and use fit on it.
     val model = cv.fit(training)
@@ -141,6 +145,7 @@ object RandomForest {
       as[(Double, Double)].
       rdd
 
+    println("Predicting completed")
     // Instantiate a new metrics objects
     val bMetrics = new BinaryClassificationMetrics(predictionAndLabels)
     val mMetrics = new MulticlassMetrics(predictionAndLabels)

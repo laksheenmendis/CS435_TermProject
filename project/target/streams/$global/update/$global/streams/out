@@ -6070,7 +6070,7 @@
 [debug] 	[NOT REQUIRED] org.scala-sbt#template-resolver;0.1!template-resolver.jar
 [debug] 	[NOT REQUIRED] org.scala-lang#jline;2.10.7!jline.jar
 [debug] 	[NOT REQUIRED] org.fusesource.jansi#jansi;1.4!jansi.jar
-[debug] :: resolution report :: resolve 1706ms :: artifacts dl 37ms
+[debug] :: resolution report :: resolve 1690ms :: artifacts dl 52ms
 [debug] 	report for default#sanfranciscoincidents-build;0.1-SNAPSHOT compile produced in /Users/cresclux/IdeaProjects/SanFranciscoIncidents/project/target/scala-2.10/sbt-0.13/resolution-cache/reports/default-sanfranciscoincidents-build-compile.xml
 [debug] 	report for default#sanfranciscoincidents-build;0.1-SNAPSHOT runtime produced in /Users/cresclux/IdeaProjects/SanFranciscoIncidents/project/target/scala-2.10/sbt-0.13/resolution-cache/reports/default-sanfranciscoincidents-build-runtime.xml
 [debug] 	report for default#sanfranciscoincidents-build;0.1-SNAPSHOT test produced in /Users/cresclux/IdeaProjects/SanFranciscoIncidents/project/target/scala-2.10/sbt-0.13/resolution-cache/reports/default-sanfranciscoincidents-build-test.xml
@@ -6084,5 +6084,5 @@
 [debug] 	report for default#sanfranciscoincidents-build;0.1-SNAPSHOT docs produced in /Users/cresclux/IdeaProjects/SanFranciscoIncidents/project/target/scala-2.10/sbt-0.13/resolution-cache/reports/default-sanfranciscoincidents-build-docs.xml
 [debug] 	report for default#sanfranciscoincidents-build;0.1-SNAPSHOT pom produced in /Users/cresclux/IdeaProjects/SanFranciscoIncidents/project/target/scala-2.10/sbt-0.13/resolution-cache/reports/default-sanfranciscoincidents-build-pom.xml
 [debug] 	report for default#sanfranciscoincidents-build;0.1-SNAPSHOT scala-tool produced in /Users/cresclux/IdeaProjects/SanFranciscoIncidents/project/target/scala-2.10/sbt-0.13/resolution-cache/reports/default-sanfranciscoincidents-build-scala-tool.xml
-[debug] 	resolve done (1706ms resolve - 37ms download)
+[debug] 	resolve done (1690ms resolve - 52ms download)
 [info] Done updating.

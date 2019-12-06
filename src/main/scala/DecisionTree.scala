@@ -1,11 +1,9 @@
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.DecisionTreeClassifier
-import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.feature.{OneHotEncoderEstimator, StringIndexer, VectorAssembler}
-import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
 import org.apache.spark.mllib.evaluation.{BinaryClassificationMetrics, MulticlassMetrics}
-import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.{Row, SparkSession}
 
 object DecisionTree {
   def main(args: Array[String]): Unit = {
@@ -24,8 +22,8 @@ object DecisionTree {
     val sb = new StringBuilder("DecisionTree\n")
 
     //Getting all of the incident data that is needed for analysis
-    var incidentFile1 = sc.textFile(INCIDENT_FILE_1)
-    val incidentFile2 = sc.textFile(INCIDENT_FILE_2)
+    var incidentFile1 = sc.textFile(INCIDENT_FILE_1,10)
+    val incidentFile2 = sc.textFile(INCIDENT_FILE_2,10)
 
     val header1 = incidentFile1.first()
     incidentFile1 = incidentFile1.filter(row => row != header1)
@@ -102,29 +100,30 @@ object DecisionTree {
     // create the model
     val decisionTree = new DecisionTreeClassifier()
 
-    val paramGrid = new ParamGridBuilder().
-      addGrid(decisionTree.impurity, Array("entropy", "gini")).
-      addGrid(decisionTree.maxDepth, Array(2,4)).
-      addGrid(decisionTree.minInstancesPerNode, Array(5,10)).
-      addGrid(decisionTree.maxBins, Array(3)).
-      build()
+//    val paramGrid = new ParamGridBuilder().
+//      addGrid(decisionTree.impurity, Array("entropy", "gini")).
+//      addGrid(decisionTree.maxDepth, Array(2,4)).
+//      addGrid(decisionTree.minInstancesPerNode, Array(5,10)).
+//      addGrid(decisionTree.maxBins, Array(3)).
+//      build()
 
     // create cross val object, define scoring metric
-    val cv = new CrossValidator().
-      setEstimator(decisionTree).
-      setEvaluator(new MulticlassClassificationEvaluator().setMetricName("weightedRecall")).
-      setEstimatorParamMaps(paramGrid).
-      setNumFolds(NO_OF_CROSS_VALIDATION_FOLDS.toInt).
-      setParallelism(2)
+//    val cv = new CrossValidator().
+//      setEstimator(decisionTree).
+//      setEvaluator(new MulticlassClassificationEvaluator().setMetricName("weightedRecall")).
+//      setEstimatorParamMaps(paramGrid).
+//      setNumFolds(NO_OF_CROSS_VALIDATION_FOLDS.toInt).
+//      setParallelism(2)
 
     // You can then treat this object as the model and use fit on it.
-    val model = cv.fit(training)
+//    val model = cv.fit(training)
+    val model1 = decisionTree.fit(training)
 
-    model.save(MODEL_OUTPUT_PATH)
+    model1.save(MODEL_OUTPUT_PATH)
 
-    sb.append("Estimator : " + model.bestModel.extractParamMap() +"\n\n")
+    sb.append("Estimator : " + model1.extractParamMap() +"\n\n")
 
-    val results = model.transform(test).select("features", "label", "prediction")
+    val results = model1.transform(test).select("features", "label", "prediction")
 
     val predictionAndLabels = results.
       select($"prediction",$"label").
