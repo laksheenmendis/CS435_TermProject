@@ -1,0 +1,89 @@
+RandomForestClassifier
+Total Records : 272646
+
+Total Records after removing null values :256796
+
+Ratio 94.19%
+
+Estimator : {
+	rfc_6ecca387cda3-cacheNodeIds: false,
+	rfc_6ecca387cda3-checkpointInterval: 10,
+	rfc_6ecca387cda3-featureSubsetStrategy: auto,
+	rfc_6ecca387cda3-featuresCol: features,
+	rfc_6ecca387cda3-impurity: gini,
+	rfc_6ecca387cda3-labelCol: label,
+	rfc_6ecca387cda3-maxBins: 32,
+	rfc_6ecca387cda3-maxDepth: 10,
+	rfc_6ecca387cda3-maxMemoryInMB: 256,
+	rfc_6ecca387cda3-minInfoGain: 0.0,
+	rfc_6ecca387cda3-minInstancesPerNode: 50,
+	rfc_6ecca387cda3-numTrees: 15,
+	rfc_6ecca387cda3-predictionCol: prediction,
+	rfc_6ecca387cda3-probabilityCol: probability,
+	rfc_6ecca387cda3-rawPredictionCol: rawPrediction,
+	rfc_6ecca387cda3-seed: 207336481,
+	rfc_6ecca387cda3-subsamplingRate: 1.0
+}
+
+Confusion matrix: 
+525.0  4.0  0.0  0.0  0.0  10.0  11448.0  0.0  0.0  0.0  
+446.0  9.0  0.0  0.0  0.0  6.0   7647.0   0.0  0.0  0.0  
+122.0  0.0  0.0  0.0  0.0  1.0   5620.0   0.0  0.0  0.0  
+1.0    0.0  0.0  0.0  0.0  0.0   93.0     0.0  0.0  0.0  
+58.0   0.0  0.0  0.0  0.0  2.0   2037.0   0.0  0.0  0.0  
+326.0  7.0  0.0  0.0  0.0  21.0  1928.0   0.0  0.0  0.0  
+320.0  1.0  0.0  0.0  0.0  11.0  36290.0  0.0  0.0  0.0  
+44.0   1.0  0.0  0.0  0.0  1.0   737.0    0.0  0.0  0.0  
+108.0  2.0  0.0  0.0  0.0  4.0   4040.0   0.0  0.0  0.0  
+176.0  2.0  0.0  0.0  0.0  2.0   4944.0   0.0  0.0  0.0  
+
+Accuracy = 0.47854378263241293
+
+Precision
+Precision(1.0) = 0.24694261523988711
+Precision(2.0) = 0.34615384615384615
+Precision(3.0) = 0.0
+Precision(5.0) = 0.0
+Precision(8.0) = 0.0
+Precision(10.0) = 0.3620689655172414
+Precision(14.0) = 0.48526422764227645
+Precision(15.0) = 0.0
+Precision(18.0) = 0.0
+Precision(20.0) = 0.0
+
+Recall
+Recall(1.0) = 0.043797447234504044
+Recall(2.0) = 0.001110014800197336
+Recall(3.0) = 0.0
+Recall(5.0) = 0.0
+Recall(8.0) = 0.0
+Recall(10.0) = 0.009202453987730062
+Recall(14.0) = 0.9909344110097755
+Recall(15.0) = 0.0
+Recall(18.0) = 0.0
+Recall(20.0) = 0.0
+
+False positive rate
+FPR(1.0) = 0.0246281169720184
+FPR(2.0) = 2.4678454257759196E-4
+FPR(3.0) = 0.0
+FPR(5.0) = 0.0
+FPR(8.0) = 0.0
+FPR(10.0) = 4.952350358710783E-4
+FPR(14.0) = 0.953482611711087
+FPR(15.0) = 0.0
+FPR(18.0) = 0.0
+FPR(20.0) = 0.0
+
+F1-Score
+F1-Score(1.0) = 0.07439948983206972
+F1-Score(2.0) = 0.0022129333661175315
+F1-Score(3.0) = 0.0
+F1-Score(5.0) = 0.0
+F1-Score(8.0) = 0.0
+F1-Score(10.0) = 0.01794871794871795
+F1-Score(14.0) = 0.6514909430371794
+F1-Score(15.0) = 0.0
+F1-Score(18.0) = 0.0
+F1-Score(20.0) = 0.0
+

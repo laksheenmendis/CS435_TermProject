@@ -1,0 +1,89 @@
+RandomForestClassifier
+Total Records : 272646
+
+Total Records after removing null values :256796
+
+Ratio 94.19%
+
+Estimator : {
+	rfc_e508a8870d94-cacheNodeIds: false,
+	rfc_e508a8870d94-checkpointInterval: 10,
+	rfc_e508a8870d94-featureSubsetStrategy: auto,
+	rfc_e508a8870d94-featuresCol: features,
+	rfc_e508a8870d94-impurity: entropy,
+	rfc_e508a8870d94-labelCol: label,
+	rfc_e508a8870d94-maxBins: 32,
+	rfc_e508a8870d94-maxDepth: 10,
+	rfc_e508a8870d94-maxMemoryInMB: 256,
+	rfc_e508a8870d94-minInfoGain: 0.0,
+	rfc_e508a8870d94-minInstancesPerNode: 50,
+	rfc_e508a8870d94-numTrees: 15,
+	rfc_e508a8870d94-predictionCol: prediction,
+	rfc_e508a8870d94-probabilityCol: probability,
+	rfc_e508a8870d94-rawPredictionCol: rawPrediction,
+	rfc_e508a8870d94-seed: 207336481,
+	rfc_e508a8870d94-subsamplingRate: 1.0
+}
+
+Confusion matrix: 
+397.0  4.0  0.0  0.0  0.0  2.0   11584.0  0.0  0.0  0.0  
+319.0  6.0  0.0  0.0  0.0  7.0   7776.0   0.0  0.0  0.0  
+76.0   0.0  0.0  0.0  0.0  0.0   5667.0   0.0  0.0  0.0  
+2.0    0.0  0.0  0.0  0.0  0.0   92.0     0.0  0.0  0.0  
+53.0   0.0  0.0  0.0  0.0  0.0   2044.0   0.0  0.0  0.0  
+277.0  3.0  0.0  0.0  0.0  12.0  1990.0   0.0  0.0  0.0  
+249.0  3.0  0.0  0.0  0.0  3.0   36367.0  0.0  0.0  0.0  
+50.0   1.0  0.0  0.0  0.0  0.0   732.0    0.0  0.0  0.0  
+90.0   3.0  0.0  0.0  0.0  0.0   4061.0   0.0  0.0  0.0  
+126.0  1.0  0.0  0.0  0.0  0.0   4997.0   0.0  0.0  0.0  
+
+Accuracy = 0.47772553705483545
+
+Precision
+Precision(1.0) = 0.2422208663819402
+Precision(2.0) = 0.2857142857142857
+Precision(3.0) = 0.0
+Precision(5.0) = 0.0
+Precision(8.0) = 0.0
+Precision(10.0) = 0.5
+Precision(14.0) = 0.48289735758863367
+Precision(15.0) = 0.0
+Precision(18.0) = 0.0
+Precision(20.0) = 0.0
+
+Recall
+Recall(1.0) = 0.03311921248018687
+Recall(2.0) = 7.400098667982239E-4
+Recall(3.0) = 0.0
+Recall(5.0) = 0.0
+Recall(8.0) = 0.0
+Recall(10.0) = 0.0052585451358457495
+Recall(14.0) = 0.9930369723117252
+Recall(15.0) = 0.0
+Recall(18.0) = 0.0
+Recall(20.0) = 0.0
+
+False positive rate
+FPR(1.0) = 0.01910563477779316
+FPR(2.0) = 2.177510669802282E-4
+FPR(3.0) = 0.0
+FPR(5.0) = 0.0
+FPR(8.0) = 0.0
+FPR(10.0) = 1.6061676839062E-4
+FPR(14.0) = 0.9646041811156247
+FPR(15.0) = 0.0
+FPR(18.0) = 0.0
+FPR(20.0) = 0.0
+
+F1-Score
+F1-Score(1.0) = 0.05827095259063555
+F1-Score(2.0) = 0.0014761963341124369
+F1-Score(3.0) = 0.0
+F1-Score(5.0) = 0.0
+F1-Score(8.0) = 0.0
+F1-Score(10.0) = 0.010407632263660017
+F1-Score(14.0) = 0.6498052388950434
+F1-Score(15.0) = 0.0
+F1-Score(18.0) = 0.0
+F1-Score(20.0) = 0.0
+

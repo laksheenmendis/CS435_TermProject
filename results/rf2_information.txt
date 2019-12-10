@@ -1,0 +1,89 @@
+RandomForestClassifier
+Total Records : 272646
+
+Total Records after removing null values :256796
+
+Ratio 94.19%
+
+Estimator : {
+	rfc_f82e89439575-cacheNodeIds: false,
+	rfc_f82e89439575-checkpointInterval: 10,
+	rfc_f82e89439575-featureSubsetStrategy: auto,
+	rfc_f82e89439575-featuresCol: features,
+	rfc_f82e89439575-impurity: entropy,
+	rfc_f82e89439575-labelCol: label,
+	rfc_f82e89439575-maxBins: 32,
+	rfc_f82e89439575-maxDepth: 5,
+	rfc_f82e89439575-maxMemoryInMB: 256,
+	rfc_f82e89439575-minInfoGain: 0.0,
+	rfc_f82e89439575-minInstancesPerNode: 50,
+	rfc_f82e89439575-numTrees: 15,
+	rfc_f82e89439575-predictionCol: prediction,
+	rfc_f82e89439575-probabilityCol: probability,
+	rfc_f82e89439575-rawPredictionCol: rawPrediction,
+	rfc_f82e89439575-seed: 207336481,
+	rfc_f82e89439575-subsamplingRate: 1.0
+}
+
+Confusion matrix: 
+0.0  0.0  0.0  0.0  0.0  0.0  11987.0  0.0  0.0  0.0  
+0.0  0.0  0.0  0.0  0.0  0.0  8108.0   0.0  0.0  0.0  
+0.0  0.0  0.0  0.0  0.0  0.0  5743.0   0.0  0.0  0.0  
+0.0  0.0  0.0  0.0  0.0  0.0  94.0     0.0  0.0  0.0  
+0.0  0.0  0.0  0.0  0.0  0.0  2097.0   0.0  0.0  0.0  
+0.0  0.0  0.0  0.0  0.0  0.0  2282.0   0.0  0.0  0.0  
+0.0  0.0  0.0  0.0  0.0  0.0  36622.0  0.0  0.0  0.0  
+0.0  0.0  0.0  0.0  0.0  0.0  783.0    0.0  0.0  0.0  
+0.0  0.0  0.0  0.0  0.0  0.0  4154.0   0.0  0.0  0.0  
+0.0  0.0  0.0  0.0  0.0  0.0  5124.0   0.0  0.0  0.0  
+
+Accuracy = 0.4756474530482895
+
+Precision
+Precision(1.0) = 0.0
+Precision(2.0) = 0.0
+Precision(3.0) = 0.0
+Precision(5.0) = 0.0
+Precision(8.0) = 0.0
+Precision(10.0) = 0.0
+Precision(14.0) = 0.4756474530482895
+Precision(15.0) = 0.0
+Precision(18.0) = 0.0
+Precision(20.0) = 0.0
+
+Recall
+Recall(1.0) = 0.0
+Recall(2.0) = 0.0
+Recall(3.0) = 0.0
+Recall(5.0) = 0.0
+Recall(8.0) = 0.0
+Recall(10.0) = 0.0
+Recall(14.0) = 1.0
+Recall(15.0) = 0.0
+Recall(18.0) = 0.0
+Recall(20.0) = 0.0
+
+False positive rate
+FPR(1.0) = 0.0
+FPR(2.0) = 0.0
+FPR(3.0) = 0.0
+FPR(5.0) = 0.0
+FPR(8.0) = 0.0
+FPR(10.0) = 0.0
+FPR(14.0) = 1.0
+FPR(15.0) = 0.0
+FPR(18.0) = 0.0
+FPR(20.0) = 0.0
+
+F1-Score
+F1-Score(1.0) = 0.0
+F1-Score(2.0) = 0.0
+F1-Score(3.0) = 0.0
+F1-Score(5.0) = 0.0
+F1-Score(8.0) = 0.0
+F1-Score(10.0) = 0.0
+F1-Score(14.0) = 0.6446627235600619
+F1-Score(15.0) = 0.0
+F1-Score(18.0) = 0.0
+F1-Score(20.0) = 0.0
+
